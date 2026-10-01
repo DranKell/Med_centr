@@ -156,7 +156,7 @@ const SOPEditor = {
             if (/TLS|сертификат|certificate/i.test(error.message)) {
                 const help = document.createElement('a');
                 help.href = 'certificates.html';
-                help.textContent = 'Настроить доверенный сертификат для Python';
+                help.textContent = 'Сертификат Минцифры для Python';
                 help.className = 'certificate-help-link';
                 status.appendChild(document.createElement('br'));
                 status.appendChild(help);
