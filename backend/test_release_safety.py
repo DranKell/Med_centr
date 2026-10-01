@@ -187,3 +187,27 @@ class ReleaseSafetyTests(unittest.TestCase):
 
         self.assertEqual(result['scope'], 'Текст')
         self.assertEqual(result['procedure'], 'Процедура')
+
+    def test_parse_model_object_accepts_nested_json_fields(self):
+        payload = '''{
+  "scope": "Настоящий СОП...",
+  "normative_refs": ["ГОСТ ИСО 9001", "Внутренние документы"],
+  "terms": {"термин": "определение"},
+  "responsibilities": {"главный врач": "ответственность"},
+  "procedure": {"шаг_1": "выполнить действие"},
+  "quality_control": {"контроль": "проверка"},
+  "documentation": {"формы": "журнал"}
+}'''
+
+        result = parse_model_object(payload, (
+            'scope', 'normative_refs', 'terms', 'responsibilities',
+            'procedure', 'quality_control', 'documentation'
+        ))
+
+        self.assertEqual(result['scope'], 'Настоящий СОП...')
+        self.assertEqual(result['normative_refs'], '[\n  "ГОСТ ИСО 9001",\n  "Внутренние документы"\n]')
+        self.assertIn('"шаг_1": "выполнить действие"', result['procedure'])
+
+    def test_parse_model_object_rejects_missing_required_fields(self):
+        with self.assertRaises(ValueError):
+            parse_model_object('{"scope": "Текст"}', ('scope', 'procedure'))

@@ -63,8 +63,16 @@ def parse_model_object(text: str, required_fields: tuple[str, ...]) -> dict:
     except json.JSONDecodeError as error:
         raise ValueError('AI response does not match the requested document schema') from error
 
-    if not isinstance(result, dict) or any(not isinstance(result.get(field), str) for field in required_fields):
+    if not isinstance(result, dict):
         raise ValueError('AI response does not match the requested document schema')
+
+    if any(not isinstance(result.get(field), (str, list, dict)) for field in required_fields):
+        raise ValueError('AI response does not match the requested document schema')
+
+    for field in required_fields:
+        value = result[field]
+        if isinstance(value, (dict, list)):
+            result[field] = json.dumps(value, ensure_ascii=False, indent=2)
     return result
 
 # --- Генерация СОП ---
@@ -96,7 +104,8 @@ async def generate_sop(req: GenerateSopRequest):
         raise HTTPException(status_code=503, detail=str(error)) from error
 
     try:
-        parse_model_object(text, SOP_FIELDS)
+        parsed = parse_model_object(text, SOP_FIELDS)
+        text = json.dumps(parsed, ensure_ascii=False, indent=2)
     except (ValueError, json.JSONDecodeError) as error:
         raise HTTPException(status_code=502, detail='ИИ ответил в некорректном формате. Текущий текст СОПа не изменён.') from error
 
