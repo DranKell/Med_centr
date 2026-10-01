@@ -14,6 +14,8 @@ header h1 { font-size: 2.5em; }
 .provider-toggle-status { display: inline-flex; align-items: center; justify-content: center; min-width: 46px; padding: 4px 8px; border-radius: 999px; background: rgba(255,255,255,0.12); font-size: 0.8rem; }
 .ai-provider-toggle.is-on .provider-toggle-status { background: rgba(72, 187, 120, 0.25); }
 .ai-provider-toggle:not(.is-on) .provider-toggle-status { background: rgba(255,255,255,0.08); }
+.mincifra-help-link { display: inline-flex; align-items: center; justify-content: center; padding: 10px 16px; border: 2px solid rgba(255,255,255,0.35); border-radius: 999px; background: rgba(255,255,255,0.12); color: #fff; text-decoration: none; font-weight: 700; transition: all 0.2s ease; }
+.mincifra-help-link:hover { background: rgba(255,255,255,0.18); }
 main { padding: 40px 0; }
 .tabs { display: flex; gap: 10px; margin-bottom: 30px; border-bottom: 2px solid #ddd; }
 .tab-btn { padding: 12px 24px; background: white; border: none; border-bottom: 3px solid transparent; cursor: pointer; }
