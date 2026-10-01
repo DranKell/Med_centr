@@ -1,0 +1,88 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
+
+:root {
+    color-scheme: light;
+    --ink: #202b2a;
+    --muted: #64716e;
+    --line: #d8dfdc;
+    --paper: #ffffff;
+    --canvas: #f2f4ef;
+    --forest: #24574b;
+    --forest-dark: #183e36;
+    --copper: #ad583d;
+    --warning: #f5ead7;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--canvas); color: var(--ink); font-family: 'DM Sans', sans-serif; }
+button, input, select { font: inherit; }
+.site-header { display: flex; min-height: 66px; align-items: center; justify-content: space-between; padding: 0 max(24px, calc((100vw - 1440px) / 2)); background: var(--forest-dark); color: white; }
+.brand { color: white; font-family: 'Manrope', sans-serif; font-size: 17px; font-weight: 800; text-decoration: none; }
+.brand span { margin-left: 14px; color: #c3d6cc; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; }
+.header-note { color: #d5e0da; font-size: 13px; }
+main { max-width: 1440px; margin: auto; padding: 36px 28px 56px; }
+.intro { display: flex; align-items: end; justify-content: space-between; gap: 32px; padding: 0 0 30px; border-bottom: 1px solid var(--line); }
+.eyebrow { margin: 0 0 12px; color: var(--forest); font-size: 11px; font-weight: 700; letter-spacing: 1px; }
+h1, h2, h3 { font-family: 'Manrope', sans-serif; }
+h1 { max-width: 750px; margin: 0; font-size: clamp(30px, 4vw, 48px); line-height: 1.12; }
+.intro-copy { max-width: 710px; margin: 14px 0 0; color: var(--muted); line-height: 1.6; }
+.draft-notice { display: grid; min-width: 270px; gap: 6px; padding: 13px 16px; border-left: 3px solid var(--copper); background: var(--warning); font-size: 13px; }
+.draft-notice strong { color: #713a27; }
+.draft-notice span { color: #6c5b4c; }
+.catalog { display: grid; grid-template-columns: minmax(260px, 330px) minmax(0, 1fr); gap: 28px; align-items: start; padding-top: 24px; }
+.catalog-sidebar { position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow: hidden; }
+.search-label { display: block; margin: 14px 0 6px; font-size: 12px; font-weight: 700; }
+.catalog-sidebar input, .catalog-sidebar select { width: 100%; min-height: 42px; padding: 9px 11px; border: 1px solid #bdc9c3; border-radius: 3px; background: white; color: var(--ink); }
+.result-count { margin: 17px 0 8px; color: var(--muted); font-size: 12px; }
+.sops-list { max-height: calc(100vh - 190px); overflow-y: auto; border-top: 1px solid var(--line); }
+.sop-link { display: grid; width: 100%; gap: 4px; padding: 12px 10px; border: 0; border-bottom: 1px solid var(--line); background: transparent; color: inherit; text-align: left; cursor: pointer; }
+.sop-link:hover, .sop-link[aria-current="true"] { background: #e4ece6; }
+.sop-link-title { font-size: 13px; font-weight: 600; line-height: 1.4; }
+.sop-link-meta { color: var(--muted); font-size: 11px; }
+.sop-detail { min-width: 0; min-height: 500px; padding: 30px 36px; border-top: 4px solid var(--forest); background: var(--paper); }
+.detail-head { display: flex; justify-content: space-between; gap: 24px; align-items: start; padding-bottom: 20px; border-bottom: 1px solid var(--line); }
+.detail-number { color: var(--forest); font-size: 12px; font-weight: 700; }
+.detail-head h2 { margin: 7px 0 10px; font-size: 27px; line-height: 1.25; }
+.category-label { margin: 0; color: var(--muted); font-size: 13px; }
+.draft-stamp { flex: 0 0 auto; padding: 6px 9px; border: 1px solid #b27a34; color: #80531d; font-size: 11px; font-weight: 700; }
+.detail-actions { display: flex; gap: 8px; }
+.print-button { padding: 9px 13px; border: 1px solid var(--forest); border-radius: 3px; background: var(--forest); color: white; cursor: pointer; }
+.print-button:hover { background: var(--forest-dark); }
+.draft-warning { margin: 20px 0; padding: 13px 15px; border-left: 3px solid var(--copper); background: #fbf5ec; color: #684b3c; font-size: 13px; line-height: 1.55; }
+.sop-section { padding: 18px 0; border-bottom: 1px solid #e5e9e6; }
+.sop-section h3 { margin: 0 0 9px; color: var(--forest-dark); font-size: 16px; }
+.sop-section p { margin: 0; line-height: 1.68; white-space: pre-wrap; overflow-wrap: anywhere; }
+.empty-state { display: grid; min-height: 430px; align-content: center; justify-items: start; }
+.empty-index { color: #d5dfd9; font-family: 'Manrope', sans-serif; font-size: 84px; font-weight: 800; line-height: 1; }
+.empty-state h2 { margin: 20px 0 7px; font-size: 23px; }
+.empty-state p { max-width: 430px; margin: 0; color: var(--muted); line-height: 1.6; }
+footer { display: flex; justify-content: space-between; gap: 18px; padding: 18px max(24px, calc((100vw - 1440px) / 2)); background: #e2e8e2; color: #52615b; font-size: 12px; }
+
+@media (max-width: 800px) {
+    .site-header { align-items: flex-start; flex-direction: column; justify-content: center; gap: 4px; padding: 14px 18px; }
+    main { padding: 26px 16px 38px; }
+    .intro { align-items: stretch; flex-direction: column; gap: 18px; }
+    .draft-notice { min-width: 0; }
+    .catalog { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+    .catalog-sidebar { position: static; max-height: none; }
+    .sops-list { display: grid; max-height: 230px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .sop-link { border-right: 1px solid var(--line); }
+    .sop-detail { min-height: 380px; padding: 22px 18px; }
+    .detail-head { flex-direction: column; }
+    .detail-head h2 { font-size: 22px; }
+    footer { flex-direction: column; padding: 16px 18px; }
+}
+
+@media print {
+    @page { margin: 16mm; }
+    body { background: white; color: black; font-family: Georgia, serif; }
+    .site-header, .intro, .catalog-sidebar, .detail-actions, footer { display: none !important; }
+    main { max-width: none; padding: 0; }
+    .catalog { display: block; padding: 0; }
+    .sop-detail { min-height: 0; padding: 0; border: 0; }
+    .detail-head h2 { font-size: 20pt; }
+    .draft-warning { border: 1px solid #777; background: white; color: black; }
+    .sop-section { break-inside: auto; }
+    .sop-section h3 { break-after: avoid; }
+    .sop-section p { font-size: 11pt; line-height: 1.45; }
+}

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Демонстрационный каталог проектов СОП для стоматологической клиники">
+    <title>Каталог проектов СОП | Dental AI Platform</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="site-header">
+        <a class="brand" href="./">Dental AI <span>Каталог СОП</span></a>
+        <span class="header-note">Демонстрационная версия · только просмотр</span>
+    </header>
+    <main>
+        <section class="intro" aria-labelledby="page-title">
+            <div>
+                <p class="eyebrow">СТОМАТОЛОГИЧЕСКАЯ КЛИНИКА · 88 ПРИМЕРОВ</p>
+                <h1 id="page-title">Проекты стандартных процедур</h1>
+                <p class="intro-copy">Примеры для ознакомления. Каждый документ является проектом и требует адаптации и проверки ответственным специалистом клиники.</p>
+            </div>
+            <div class="draft-notice" role="note"><strong>Все документы — черновики</strong><span>Нормативные ссылки в демонстрации не подтверждены.</span></div>
+        </section>
+
+        <section class="catalog" aria-label="Каталог СОПов">
+            <aside class="catalog-sidebar">
+                <label class="search-label" for="sop-search">Поиск по названию</label>
+                <input id="sop-search" type="search" placeholder="Например, стерилизация" autocomplete="off">
+                <label class="search-label" for="category-filter">Категория</label>
+                <select id="category-filter"><option value="">Все категории</option></select>
+                <p id="result-count" class="result-count" aria-live="polite"></p>
+                <div id="sops-list" class="sops-list" aria-label="Примеры СОПов"></div>
+            </aside>
+            <article id="sop-detail" class="sop-detail" aria-live="polite">
+                <div class="empty-state"><span class="empty-index">88</span><h2>Выберите проект из каталога</h2><p>Содержимое можно просматривать и печатать. Редактирование, сохранение и отправка данных недоступны.</p></div>
+            </article>
+        </section>
+    </main>
+    <footer><span>Dental AI Platform</span><span>Проекты для ознакомления. Не являются утверждёнными документами.</span></footer>
+    <script src="app.js"></script>
+</body>
+</html>
