@@ -147,6 +147,7 @@ const SOPEditor = {
         const title = document.getElementById('sop-title').value;
         if (!title) { alert('Сначала впиши название СОП'); return; }
         const category = document.getElementById('sop-category').value;
+        const normativeRefs = document.getElementById('sop-f-normative_refs').value.trim();
         const enabledProviders = LocalData.getEnabledAIProviders();
         const button = document.getElementById('generate-sop-ai-btn');
         const status = document.getElementById('ai-generation-status');
@@ -164,7 +165,7 @@ const SOPEditor = {
             if (!enabledProviders.length) {
                 throw new Error('Оба ИИ отключены. Включите хотя бы один провайдер в шапке.');
             }
-            const r = await fetch(API_BASE + '/api/ai/generate-sop', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: title, category: category, enabled_providers: enabledProviders }) });
+            const r = await fetch(API_BASE + '/api/ai/generate-sop', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: title, category: category, normative_refs: normativeRefs, enabled_providers: enabledProviders }) });
             const data = await r.json().catch(function() { return {}; });
             if (!r.ok) {
                 throw new Error(data.detail || 'Сервер вернул ошибку HTTP ' + r.status + '.');
@@ -181,7 +182,13 @@ const SOPEditor = {
                 if (input) input.value = formatSOPField(result[field.key], field.key);
             });
             status.className = 'ai-generation-status is-success no-print';
-            status.textContent = 'Черновик получен от ' + (data.provider || 'ИИ') + (data.from_cache ? ' (из кэша)' : '') + '. Проверьте нормативные ссылки и весь текст.';
+            const sourceCount = data.normative_search?.sources?.length || 0;
+            const sourceStatus = data.normative_search?.status === 'found'
+                ? ' Найдено официальных публикаций: ' + sourceCount + '; проверьте их применимость и актуальность.'
+                : data.normative_search?.status === 'not_found'
+                    ? ' На Официальном портале документы по запросу не найдены.'
+                    : ' Официальный поиск временно недоступен.';
+            status.textContent = 'Черновик получен от ' + (data.provider || 'ИИ') + (data.from_cache ? ' (из кэша)' : '') + '.' + sourceStatus;
         } catch (error) {
             status.className = 'ai-generation-status is-error no-print';
             status.textContent = 'Генерация не выполнена: ' + error.message;

@@ -211,3 +211,70 @@ class ReleaseSafetyTests(unittest.TestCase):
     def test_parse_model_object_rejects_missing_required_fields(self):
         with self.assertRaises(ValueError):
             parse_model_object('{"scope": "Текст"}', ('scope', 'procedure'))
+
+    def test_normative_refs_are_explicit_when_search_is_unavailable(self):
+        from services.ai_service.legal_search import format_official_references
+
+        result = format_official_references({'status': 'unavailable', 'queries': ['СОП'], 'sources': []})
+
+        self.assertIn('поиск на официальном интернет-портале', result.lower())
+        self.assertIn('не проверены', result.lower())
+
+    def test_official_search_references_use_only_real_document_results(self):
+        from services.ai_service.legal_search import format_official_references
+
+        result = format_official_references({
+            'status': 'found',
+            'queries': ['СанПиН'],
+            'sources': [{
+                'title': 'Постановление Главного государственного санитарного врача РФ',
+                'url': 'http://publication.pravo.gov.ru/document/0001202507250036',
+                'publication_number': '0001202507250036',
+                'publication_date': '25.07.2025',
+            }],
+        })
+
+        self.assertIn('0001202507250036', result)
+        self.assertIn('25.07.2025', result)
+        self.assertIn('http://publication.pravo.gov.ru/document/', result)
+
+    def test_official_search_parser_extracts_document_metadata(self):
+        from services.ai_service.legal_search import parse_official_documents
+
+        html = '''<div class="documents-table-row">
+          <a href="/document/0001202507250036" class="documents-item-name">Постановление № 12<br />СанПиН 3.3686-21</a>
+          <span class="info-name">Номер опубликования: </span><span class="info-data">0001202507250036</span>
+          <span class="info-name">Дата опубликования: </span><span class="info-data">25.07.2025</span>
+        </div>'''
+
+        results = parse_official_documents(html)
+
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0]['publication_number'], '0001202507250036')
+        self.assertEqual(results[0]['publication_date'], '25.07.2025')
+        self.assertIn('СанПиН 3.3686-21', results[0]['title'])
+
+    def test_official_search_prioritizes_base_approving_act(self):
+        from services.ai_service.legal_search import format_official_references
+
+        references = format_official_references({
+            'status': 'found',
+            'queries': ['СанПиН'],
+            'sources': [
+                {
+                    'title': 'Постановление от 2025 года № 12 "О внесении изменений в постановление № 4 "Об утверждении правил"',
+                    'url': 'http://publication.pravo.gov.ru/document/amendment',
+                    'publication_number': 'amendment',
+                    'publication_date': '25.07.2025',
+                },
+                {
+                    'title': 'Постановление Главного санитарного врача от 28.01.2021 № 4 "Об утверждении СанПиН 3.3686-21"',
+                    'url': 'http://publication.pravo.gov.ru/document/base',
+                    'publication_number': 'base',
+                    'publication_date': '18.02.2021',
+                },
+            ],
+        })
+
+        self.assertLess(references.index('/document/base'), references.index('/document/amendment'))
+        self.assertIn('применимость к этому СОП не проверены', references)

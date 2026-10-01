@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 from services.ai_service.router import AIRouter
 from services.ai_service.prompts import APP_SYSTEM
 from services.ai_service.cache import CacheService
+from services.ai_service.legal_search import format_official_references, search_official_documents
 from services.ai_service.sanitizer import sanitize_document_text
 
 router = APIRouter()
@@ -78,7 +79,7 @@ def parse_model_object(text: str, required_fields: tuple[str, ...]) -> dict:
 # --- Генерация СОП ---
 SOP_SYSTEM = APP_SYSTEM
 
-SOP_PROMPT = 'Сгенерируй СОП на тему: {title}. Категория: {category}. Дополнительные нормативные ссылки: {normative_refs}. Верни СТРОГО JSON с ключами: scope, normative_refs, terms, responsibilities, procedure, quality_control, documentation. Без пояснений вне JSON.'
+SOP_PROMPT = 'Сгенерируй СОП на тему: {title}. Категория: {category}. Ссылки пользователя: {normative_refs}. Карточки найденных официальных публикаций: {official_sources}. Используй нормативные документы только из этих карточек или ссылок пользователя; не выдумывай номера, даты и URL. Найденные документы являются кандидатами: укажи, что применимость и актуальность необходимо подтвердить ответственному сотруднику. Верни СТРОГО JSON с ключами: scope, normative_refs, terms, responsibilities, procedure, quality_control, documentation. Без пояснений вне JSON.'
 
 class GenerateSopRequest(BaseModel):
     title: str = Field(..., min_length=1, max_length=300)
@@ -91,11 +92,26 @@ async def generate_sop(req: GenerateSopRequest):
     title = sanitize_document_text(req.title)
     category = sanitize_document_text(req.category)
     normative_refs = sanitize_document_text(req.normative_refs)
-    prompt = SOP_PROMPT.format(title=title, category=category, normative_refs=normative_refs)
     try:
         from config import settings
         if not settings.EXTERNAL_AI_ENABLED:
             raise HTTPException(status_code=503, detail='Внешний ИИ отключён настройкой EXTERNAL_AI_ENABLED.')
+
+        source_search = await search_official_documents(
+            [title, normative_refs],
+            ca_bundle=settings.SSL_CERT_FILE or None,
+            category=category,
+        )
+        official_sources = '\n'.join(
+            f"- {source['title']} | опубликовано {source['publication_number']} от {source['publication_date']} | {source['url']}"
+            for source in source_search['sources']
+        ) or f"Статус официального поиска: {source_search['status']}"
+        prompt = SOP_PROMPT.format(
+            title=title,
+            category=category,
+            normative_refs=normative_refs or 'не указаны',
+            official_sources=official_sources,
+        )
 
         ai = get_ai_router(req.enabled_providers)
         response = await ai.generate(key='sop', prompt=prompt, system=SOP_SYSTEM)
@@ -105,6 +121,7 @@ async def generate_sop(req: GenerateSopRequest):
 
     try:
         parsed = parse_model_object(text, SOP_FIELDS)
+        parsed['normative_refs'] = format_official_references(source_search, normative_refs)
         text = json.dumps(parsed, ensure_ascii=False, indent=2)
     except (ValueError, json.JSONDecodeError) as error:
         raise HTTPException(status_code=502, detail='ИИ ответил в некорректном формате. Текущий текст СОПа не изменён.') from error
@@ -113,6 +130,7 @@ async def generate_sop(req: GenerateSopRequest):
         'text': text,
         'provider': response.provider,
         'from_cache': response.from_cache,
+        'normative_search': source_search,
         'fallback': False,
         'draft': True,
         'warning': 'Черновик ИИ. Требуется проверка ответственным специалистом.',
