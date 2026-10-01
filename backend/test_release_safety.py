@@ -12,6 +12,7 @@ from models.sop import SOP
 from seed_sops import seed_sops
 from sop_catalog import CATALOGUE
 from services.ai_service.gigachat import GigaChatProvider
+from api.endpoints.ai import parse_model_object
 
 
 class ReleaseSafetyTests(unittest.TestCase):
@@ -165,3 +166,24 @@ class ReleaseSafetyTests(unittest.TestCase):
         self.assertEqual(get_enabled_providers(configured, ['unknown']), [])
         self.assertEqual(get_enabled_providers(configured, []), configured)
         self.assertEqual(get_enabled_providers(configured, None), configured)
+
+    def test_parse_model_object_accepts_markdown_fenced_json(self):
+        payload = '''```json
+{
+  "scope": "Текст",
+  "normative_refs": "Ссылка",
+  "terms": "Термины",
+  "responsibilities": "Ответственность",
+  "procedure": "Процедура",
+  "quality_control": "Контроль",
+  "documentation": "Документация"
+}
+```'''
+
+        result = parse_model_object(payload, (
+            'scope', 'normative_refs', 'terms', 'responsibilities',
+            'procedure', 'quality_control', 'documentation'
+        ))
+
+        self.assertEqual(result['scope'], 'Текст')
+        self.assertEqual(result['procedure'], 'Процедура')

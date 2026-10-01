@@ -1,4 +1,5 @@
 ﻿import json
+import re
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
@@ -47,7 +48,21 @@ def get_ai_router(enabled_names: list[str] | None = None) -> AIRouter:
 
 
 def parse_model_object(text: str, required_fields: tuple[str, ...]) -> dict:
-    result = json.loads(text)
+    cleaned = text.strip()
+    if cleaned.startswith('```'):
+        cleaned = re.sub(r'^```(?:json)?\s*', '', cleaned, flags=re.IGNORECASE)
+        cleaned = re.sub(r'\s*```\s*$', '', cleaned, flags=re.IGNORECASE)
+
+    start = cleaned.find('{')
+    end = cleaned.rfind('}')
+    if start != -1 and end != -1 and start < end:
+        cleaned = cleaned[start:end + 1]
+
+    try:
+        result = json.loads(cleaned)
+    except json.JSONDecodeError as error:
+        raise ValueError('AI response does not match the requested document schema') from error
+
     if not isinstance(result, dict) or any(not isinstance(result.get(field), str) for field in required_fields):
         raise ValueError('AI response does not match the requested document schema')
     return result
