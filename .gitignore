@@ -1,0 +1,11 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+venv/
+.env
+*.db
+*.sqlite
+.vscode/
+.idea/
+backend/output/*.docx
+backend/output/*.pdf

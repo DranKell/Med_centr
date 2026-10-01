@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dental AI Platform</title>
+    <link rel="stylesheet" href="css/style.css?v=20261001-6">
+</head>
+<body>
+    <header>
+        <div class="container header-row">
+            <div class="header-copy">
+                <h1>Dental AI Platform</h1>
+                <p class="subtitle">Автоматизация медицинских документов для стоматологии</p>
+            </div>
+            <div class="ai-provider-controls" aria-label="Переключатели ИИ">
+                <button type="button" class="ai-provider-toggle is-on" data-ai-provider="gigachat" aria-pressed="true">
+                    <span class="provider-toggle-name">GigaChat</span>
+                    <span class="provider-toggle-status">Вкл</span>
+                </button>
+                <button type="button" class="ai-provider-toggle is-on" data-ai-provider="yandexgpt" aria-pressed="true">
+                    <span class="provider-toggle-name">YandexGPT</span>
+                    <span class="provider-toggle-status">Вкл</span>
+                </button>
+            </div>
+        </div>
+    </header>
+    <main class="container">
+        <nav class="tabs">
+            <button class="tab-btn active" data-tab="sops">СОПы</button>
+            <button class="tab-btn" data-tab="checklists">Чек-листы</button>
+        </nav>
+        <section id="checklists" class="tab-content">
+            <div class="checklist-header">
+                <div>
+                    <h2>Проверки клиники</h2>
+                    <p>Фиксируйте фактическое состояние. Источники и применимость требований сверяйте с официальными документами.</p>
+                </div>
+                <div class="checklist-toolbar no-print">
+                    <select id="checklist-template-select" aria-label="Шаблон проверки"></select>
+                    <button class="btn btn-primary" id="checklist-new-btn" type="button">Новая проверка</button>
+                </div>
+            </div>
+            <div class="checklist-layout">
+                <aside class="checklist-history-panel no-print">
+                    <h3>История проверок</h3>
+                    <div id="checklist-history" aria-live="polite"></div>
+                </aside>
+                <section id="checklist-workspace" class="checklist-workspace" aria-live="polite">
+                    <p>Загрузка шаблонов…</p>
+                </section>
+            </div>
+        </section>
+    </main>
+    <section id="sops" class="tab-content active">
+        <h2>Стандартные операционные процедуры (СОП)</h2>
+        <div class="sops-toolbar">
+            <select id="sop-filter" onchange="SOPEditor.loadList()">
+                <option value="">Все категории</option>
+                <option value="emergency">Неотложные состояния</option>
+                <option value="infection-control">Инфекционная безопасность</option>
+                <option value="sterilization">Очистка и стерилизация</option>
+                <option value="sanitary">Санитарный режим</option>
+                <option value="medical-waste">Медицинские отходы</option>
+                <option value="equipment">Оборудование и укладки</option>
+                <option value="clinical-safety">Безопасность медицинской деятельности</option>
+                <option value="clinic-organization">Организация клиники</option>
+            </select>
+            <button class="btn btn-primary" onclick="SOPEditor.newSop()">+ Новый СОП</button>
+        </div>
+        <div class="sops-layout">
+            <div id="sops-list" class="sops-list"></div>
+            <div id="sop-card" class="sop-card-panel">
+                <p>Выбери СОП слева или создай новый.</p>
+            </div>
+        </div>
+    </section>
+    <footer>
+        <div class="container">
+            <p>Платформа внутренних документов клиники. Проекты СОП требуют проверки и утверждения.</p>
+            <p>Backend: <span id="backend-status">Не подключен</span></p>
+        </div>
+    </footer>
+    <script src="js/storage.js?v=20261001-6"></script>
+    <script src="js/api.js?v=20261001-6"></script>
+    <script src="js/app.js?v=20261001-6"></script>
+    <script src="js/sops.js?v=20261001-6"></script>
+    <script src="js/checklists.js?v=20261001-6"></script>
+</body>
+</html>

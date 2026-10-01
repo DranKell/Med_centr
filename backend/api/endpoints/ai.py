@@ -1,0 +1,95 @@
+﻿import json
+
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
+from services.ai_service.router import AIRouter
+from services.ai_service.prompts import APP_SYSTEM
+from services.ai_service.cache import CacheService
+from services.ai_service.sanitizer import sanitize_document_text
+
+router = APIRouter()
+
+SOP_FIELDS = (
+    'scope', 'normative_refs', 'terms', 'responsibilities', 'procedure',
+    'quality_control', 'documentation',
+)
+
+
+def get_enabled_providers(configured: list[str], enabled_names: list[str] | None) -> list[str]:
+    if not enabled_names:
+        return configured
+    enabled_set = {name.strip().lower() for name in enabled_names if name and name.strip()}
+    if not enabled_set:
+        return configured
+    return [name for name in configured if name.lower() in enabled_set]
+
+
+def get_ai_router(enabled_names: list[str] | None = None) -> AIRouter:
+    from config import settings
+    from services.ai_service.gigachat import GigaChatProvider
+    from services.ai_service.yandexgpt import YandexGPTProvider
+
+    configured = []
+    ca_bundle = settings.SSL_CERT_FILE or None
+    if settings.GIGACHAT_CLIENT_ID and settings.GIGACHAT_CLIENT_SECRET:
+        configured.append('gigachat')
+    if settings.YANDEX_IAM_TOKEN:
+        configured.append('yandexgpt')
+
+    providers = []
+    if 'gigachat' in get_enabled_providers(configured, enabled_names):
+        providers.append(GigaChatProvider(settings.GIGACHAT_CLIENT_ID, settings.GIGACHAT_CLIENT_SECRET, settings.GIGACHAT_SCOPE, ca_bundle))
+    if 'yandexgpt' in get_enabled_providers(configured, enabled_names):
+        providers.append(YandexGPTProvider(settings.YANDEX_IAM_TOKEN, settings.YANDEX_FOLDER_ID, settings.YANDEX_MODEL_URI, ca_bundle))
+
+    cache = CacheService()
+    return AIRouter(providers, cache)
+
+
+def parse_model_object(text: str, required_fields: tuple[str, ...]) -> dict:
+    result = json.loads(text)
+    if not isinstance(result, dict) or any(not isinstance(result.get(field), str) for field in required_fields):
+        raise ValueError('AI response does not match the requested document schema')
+    return result
+
+# --- Генерация СОП ---
+SOP_SYSTEM = APP_SYSTEM
+
+SOP_PROMPT = 'Сгенерируй СОП на тему: {title}. Категория: {category}. Дополнительные нормативные ссылки: {normative_refs}. Верни СТРОГО JSON с ключами: scope, normative_refs, terms, responsibilities, procedure, quality_control, documentation. Без пояснений вне JSON.'
+
+class GenerateSopRequest(BaseModel):
+    title: str = Field(..., min_length=1, max_length=300)
+    category: str = Field(default='emergency', max_length=100)
+    normative_refs: str = Field(default='', max_length=3000)
+    enabled_providers: list[str] | None = Field(default=None, max_items=10)
+
+@router.post('/generate-sop')
+async def generate_sop(req: GenerateSopRequest):
+    title = sanitize_document_text(req.title)
+    category = sanitize_document_text(req.category)
+    normative_refs = sanitize_document_text(req.normative_refs)
+    prompt = SOP_PROMPT.format(title=title, category=category, normative_refs=normative_refs)
+    try:
+        from config import settings
+        if not settings.EXTERNAL_AI_ENABLED:
+            raise HTTPException(status_code=503, detail='Внешний ИИ отключён настройкой EXTERNAL_AI_ENABLED.')
+
+        ai = get_ai_router(req.enabled_providers)
+        response = await ai.generate(key='sop', prompt=prompt, system=SOP_SYSTEM)
+        text = sanitize_document_text(response.text)
+    except RuntimeError as error:
+        raise HTTPException(status_code=503, detail=str(error)) from error
+
+    try:
+        parse_model_object(text, SOP_FIELDS)
+    except (ValueError, json.JSONDecodeError) as error:
+        raise HTTPException(status_code=502, detail='ИИ ответил в некорректном формате. Текущий текст СОПа не изменён.') from error
+
+    return {
+        'text': text,
+        'provider': response.provider,
+        'from_cache': response.from_cache,
+        'fallback': False,
+        'draft': True,
+        'warning': 'Черновик ИИ. Требуется проверка ответственным специалистом.',
+    }

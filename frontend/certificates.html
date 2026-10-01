@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Доверенный сертификат для Python</title>
+    <link rel="stylesheet" href="css/style.css?v=20261001-6">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Сертификат VPN / прокси</h1>
+            <p class="subtitle">Настройка доверия Python без отключения TLS-проверки</p>
+        </div>
+    </header>
+    <main class="container certificate-guide">
+        <p><a href="/?v=20261001-6">← Вернуться в приложение</a></p>
+        <section class="guide-section">
+            <h2>Почему появляется ошибка</h2>
+            <p>Python не доверяет одному из сертификатов в TLS-цепочке соединения с GigaChat. Это может быть сертификат корпоративного VPN, HTTPS-прокси или антивирусной инспекции. Пока цепочка не доверена, запрос остановлен до передачи ключа авторизации.</p>
+            <p><strong>Не отключайте проверку TLS</strong> через <code>verify=False</code>, <code>CURL_CA_BUNDLE=</code> или аналогичный обход: он делает соединение уязвимым для подмены.</p>
+        </section>
+        <section class="guide-section">
+            <h2>Что запросить у администратора сети</h2>
+            <ol>
+                <li>Корневой или промежуточный CA-сертификат, которым VPN/прокси подписывает HTTPS-трафик.</li>
+                <li>Сертификат в PEM или Base-64 X.509 формате, обычно файл с расширением <code>.pem</code> или <code>.crt</code>.</li>
+                <li>Отпечаток SHA-256 сертификата, сообщённый отдельно от файла, чтобы сверить подлинность.</li>
+                <li>Подтверждение, что организация разрешает этому компьютеру обращаться к API GigaChat через данный VPN/прокси.</li>
+            </ol>
+            <p>Не загружайте случайные CA-сертификаты с сайтов и не устанавливайте их без проверки владельца сети.</p>
+        </section>
+        <section class="guide-section">
+            <h2>Подключение сертификата для backend</h2>
+            <ol>
+                <li>Сохраните проверенный CA-файл, например <code>C:\Med_centr\backend\certs\organization-proxy-ca.pem</code>. Не добавляйте приватный ключ, если его отдельно не выдал администратор; для доверия нужен публичный сертификат CA.</li>
+                <li>Откройте `backend\.env` и укажите полный путь:</li>
+            </ol>
+            <pre><code>SSL_CERT_FILE=C:\Med_centr\backend\certs\organization-proxy-ca.pem</code></pre>
+            <ol start="3">
+                <li>Полностью остановите backend и запустите `start.bat` заново, чтобы Python получил переменную окружения до запуска HTTPX.</li>
+                <li>Нажмите генерацию СОПа. Если цепочка сертификатов принята, ошибка TLS исчезнет; при отказе учётных данных интерфейс отдельно сообщит HTTP 401.</li>
+            </ol>
+        </section>
+        <section class="guide-section">
+            <h2>Официальная документация</h2>
+            <p><a href="https://www.python-httpx.org/advanced/ssl/" target="_blank" rel="noopener noreferrer">HTTPX: SSL certificates and verification</a></p>
+            <p>HTTPX использует системное хранилище сертификатов через `truststore`, когда пакет доступен, либо CA bundle из окружения. Для этой конфигурации можно указать проверенный CA-файл через <code>SSL_CERT_FILE</code>. Серверный сертификат по-прежнему проверяется.</p>
+        </section>
+        <section class="guide-section guide-warning">
+            <h2>Если после этого будет HTTP 401</h2>
+            <p>TLS-соединение уже установлено, но GigaChat отклонил авторизацию. Проверьте в кабинете провайдера, что client ID и secret принадлежат одной паре, ключ не отозван/не истёк, scope соответствует типу доступа, а доступ к API активирован. Не отправляйте секреты в чат или скриншоты.</p>
+        </section>
+    </main>
+    <footer>
+        <div class="container"><p>Проверку TLS отключать нельзя.</p></div>
+    </footer>
+</body>
+</html>
