@@ -16,6 +16,9 @@ header h1 { font-size: 2.5em; }
 .ai-provider-toggle:not(.is-on) .provider-toggle-status { background: rgba(255,255,255,0.08); }
 .mincifra-help-link { display: inline-flex; align-items: center; justify-content: center; padding: 10px 16px; border: 2px solid rgba(255,255,255,0.35); border-radius: 999px; background: rgba(255,255,255,0.12); color: #fff; text-decoration: none; font-weight: 700; transition: all 0.2s ease; }
 .mincifra-help-link:hover { background: rgba(255,255,255,0.18); }
+.theme-toggle { display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; border: 2px solid rgba(255,255,255,0.35); border-radius: 999px; background: rgba(255,255,255,0.12); color: #fff; cursor: pointer; font: inherit; font-weight: 700; }
+.theme-toggle:hover { background: rgba(255,255,255,0.2); }
+.theme-toggle-icon { width: 1.2em; font-size: 1.15rem; line-height: 1; }
 main { padding: 40px 0; }
 .tabs { display: flex; gap: 10px; margin-bottom: 30px; border-bottom: 2px solid #ddd; }
 .tab-btn { padding: 12px 24px; background: white; border: none; border-bottom: 3px solid transparent; cursor: pointer; }
@@ -115,6 +118,67 @@ footer { background: #2d3748; color: white; text-align: center; padding: 20px 0;
 	.checklist-disclaimer { margin: 16px 0 0; padding-top: 12px; border-top: 1px solid #c8d0d4; color: #4c5963; font-size: 0.85rem; }
 	.checklist-actions { display: flex; justify-content: flex-end; margin-top: 12px; }
 	.checklist-error { padding: 16px; border-left: 4px solid #a6423a; background: #fff2f0; }
+	@media (max-width: 480px) {
+		.sops-toolbar { flex-wrap: wrap; }
+		.sops-toolbar select { max-width: 100%; }
+		.sops-toolbar .btn { margin: 0; }
+		.checklist-toolbar .btn { margin-left: 0; }
+	}
+
+	body[data-theme="dark"] { background: #171c20; color: #e6ecef; color-scheme: dark; }
+	body[data-theme="dark"] .tabs { border-color: #3a454b; }
+	body[data-theme="dark"] .tab-btn,
+	body[data-theme="dark"] .situation-card,
+	body[data-theme="dark"] .sop-card-panel,
+	body[data-theme="dark"] .checklist-document,
+	body[data-theme="dark"] .checklist-toolbar select,
+	body[data-theme="dark"] .checklist-meta input,
+	body[data-theme="dark"] .checklist-item-fields input,
+	body[data-theme="dark"] .checklist-item-fields select,
+	body[data-theme="dark"] .checklist-item-fields textarea,
+	body[data-theme="dark"] .checklist-overall textarea,
+	body[data-theme="dark"] .sop-meta input,
+	body[data-theme="dark"] .sop-meta select,
+	body[data-theme="dark"] .sop-field textarea,
+	body[data-theme="dark"] .sops-toolbar select,
+	body[data-theme="dark"] .modal-content { background: #222a2f; color: #e6ecef; border-color: #4a575e; }
+	body[data-theme="dark"] .tab-btn.active { color: #8bc5c0; border-bottom-color: #8bc5c0; }
+	body[data-theme="dark"] .situation-card h3,
+	body[data-theme="dark"] .sop-card-panel h3 { color: #91c9c4; }
+	body[data-theme="dark"] .sop-field textarea[readonly] { background: #1c2327; }
+	body[data-theme="dark"] .approval-form { background: #20282c; border-color: #465259; }
+	body[data-theme="dark"] .checklist-header p,
+	body[data-theme="dark"] .inspection-history-item span,
+	body[data-theme="dark"] .muted,
+	body[data-theme="dark"] .checklist-item-heading small,
+	body[data-theme="dark"] .checklist-disclaimer { color: #b2c0c6; }
+	body[data-theme="dark"] .inspection-history-item { color: #e6ecef; border-color: #3a454b; }
+	body[data-theme="dark"] .inspection-history-item:hover { background: #263237; }
+	body[data-theme="dark"] .checklist-document-head,
+	body[data-theme="dark"] .checklist-item,
+	body[data-theme="dark"] .checklist-disclaimer { border-color: #3a454b; }
+	body[data-theme="dark"] .checklist-source { background: #293437; }
+	body[data-theme="dark"] .checklist-index { background: #304447; color: #c6e2df; }
+	body[data-theme="dark"] .draft-stamp { color: #e3cc8b; border-color: #927b3e; }
+	body[data-theme="dark"] .ai-generation-status { background: #27363b; color: #d8e8ec; }
+	body[data-theme="dark"] .ai-generation-status.is-success { background: #24392d; color: #c5e4ce; }
+	body[data-theme="dark"] .ai-generation-status.is-error { background: #422b29; color: #ffd5d0; }
+	body[data-theme="dark"] .ai-generation-status.is-loading { background: #26383c; }
+	body[data-theme="dark"] .certificate-help-link { color: #a8d2ff; }
+	body[data-theme="dark"] .mkb { background: #2c373d; }
+
+	@media (max-width: 900px) {
+		.header-row { align-items: flex-start; flex-direction: column; }
+		.header-copy { width: 100%; }
+		.ai-provider-controls { justify-content: center; width: 100%; }
+	}
+
+	@media print {
+		body[data-theme="dark"] { background: white; color: black; color-scheme: light; }
+		body[data-theme="dark"] .sop-card-panel,
+		body[data-theme="dark"] .sop-field textarea,
+		body[data-theme="dark"] .sop-field textarea[readonly] { background: white; color: black; }
+	}
 	@media (max-width: 900px) {
 		.checklist-layout { grid-template-columns: 1fr; }
 		.checklist-history-panel { order: 2; }

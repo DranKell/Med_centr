@@ -23,5 +23,13 @@ const LocalData = {
         return Object.entries(this.getAIProviderState())
             .filter(function(entry) { return entry[1]; })
             .map(function(entry) { return entry[0]; });
+    },
+    getTheme() {
+        return localStorage.getItem('app-theme') === 'dark' ? 'dark' : 'light';
+    },
+    setTheme(theme) {
+        const selectedTheme = theme === 'dark' ? 'dark' : 'light';
+        localStorage.setItem('app-theme', selectedTheme);
+        return selectedTheme;
     }
 };

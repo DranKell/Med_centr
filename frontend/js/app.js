@@ -1,4 +1,22 @@
 document.addEventListener('DOMContentLoaded', async function() {
+    const themeButton = document.getElementById('theme-toggle');
+    const applyTheme = function(theme) {
+        document.body.dataset.theme = theme;
+        if (themeButton) {
+            const isDark = theme === 'dark';
+            themeButton.setAttribute('aria-pressed', isDark ? 'true' : 'false');
+            themeButton.querySelector('.theme-toggle-icon').textContent = isDark ? '☀' : '☾';
+            themeButton.querySelector('.theme-toggle-label').textContent = isDark ? 'Светлая тема' : 'Тёмная тема';
+        }
+    };
+    applyTheme(LocalData.getTheme());
+    if (themeButton) {
+        themeButton.addEventListener('click', function() {
+            const nextTheme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
+            applyTheme(LocalData.setTheme(nextTheme));
+        });
+    }
+
     await API.checkBackend();
     LocalData.clearLegacyClinicalData();
     SOPEditor.loadList();

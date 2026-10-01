@@ -15,6 +15,38 @@ function escapeSOPHTML(value) {
     });
 }
 
+function formatSOPField(value, fieldKey) {
+    if (value === null || value === undefined) return '';
+    if (typeof value === 'string') {
+        const trimmed = value.trim();
+        if (!trimmed || /^-?\s*(?:\[\]|\{\})$/.test(trimmed)) return '';
+        if (trimmed[0] === '[' || trimmed[0] === '{') {
+            try {
+                return formatSOPField(JSON.parse(trimmed), fieldKey);
+            } catch (error) {
+                return trimmed;
+            }
+        }
+        return trimmed.split(/\r?\n/).filter(function(line) {
+            return !/^-?\s*(?:\[\]|\{\})$/.test(line.trim());
+        }).join('\n');
+    }
+    if (Array.isArray(value)) {
+        return value.map(function(item) {
+            return formatSOPField(item, fieldKey);
+        }).filter(Boolean).join('\n');
+    }
+    if (typeof value === 'object') {
+        return Object.entries(value).map(function(entry) {
+            const content = formatSOPField(entry[1], fieldKey);
+            if (!content) return '';
+            if (fieldKey === 'normative_refs') return content;
+            return entry[0] + ': ' + content;
+        }).filter(Boolean).join('\n');
+    }
+    return String(value);
+}
+
 const SOPEditor = {
     currentId: null,
     fields: [
@@ -67,7 +99,7 @@ const SOPEditor = {
         for (const k in SOP_CATEGORIES) html += '<option value="' + k + '"' + (s.category === k ? ' selected' : '') + '>' + SOP_CATEGORIES[k] + '</option>';
         html += '</select></label></div>';
         this.fields.forEach(function(f) {
-            html += '<div class="sop-field"><label>' + f.label + '</label><textarea id="sop-f-' + f.key + '"' + (editable ? '' : ' readonly') + '>' + escapeSOPHTML(s[f.key] || '') + '</textarea></div>';
+            html += '<div class="sop-field"><label>' + f.label + '</label><textarea id="sop-f-' + f.key + '"' + (editable ? '' : ' readonly') + '>' + escapeSOPHTML(formatSOPField(s[f.key], f.key)) + '</textarea></div>';
         });
         html += '<div class="sop-actions no-print">';
         if (editable) {
@@ -146,7 +178,7 @@ const SOPEditor = {
             }
             this.fields.forEach(function(field) {
                 const input = document.getElementById('sop-f-' + field.key);
-                if (input) input.value = result[field.key];
+                if (input) input.value = formatSOPField(result[field.key], field.key);
             });
             status.className = 'ai-generation-status is-success no-print';
             status.textContent = 'Черновик получен от ' + (data.provider || 'ИИ') + (data.from_cache ? ' (из кэша)' : '') + '. Проверьте нормативные ссылки и весь текст.';
