@@ -1,5 +1,7 @@
-﻿from fastapi import FastAPI
+﻿from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from pathlib import Path
 from database import engine, Base
 from config import settings
 from api.endpoints import sops, ai, checklists
@@ -20,13 +22,16 @@ app.include_router(sops.router, prefix='/api/sops', tags=['sops'])
 app.include_router(ai.router, prefix='/api/ai', tags=['ai'])
 app.include_router(checklists.router, prefix='/api/checklists', tags=['checklists'])
 
-@app.get('/')
-def root():
-    return {'message': 'Dental AI Platform API', 'version': '1.0.0', 'port': 9090}
-
 @app.get('/health')
 def health_check():
     return {'status': 'ok'}
+
+@app.api_route('/api/{path:path}', methods=['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'], include_in_schema=False)
+def unknown_api(path: str):
+    raise HTTPException(status_code=404, detail='Not Found')
+
+# Mount last so API, health and documentation routes take precedence.
+app.mount('/', StaticFiles(directory=Path(__file__).resolve().parent.parent / 'frontend', html=True), name='frontend')
 
 if __name__ == '__main__':
     import uvicorn

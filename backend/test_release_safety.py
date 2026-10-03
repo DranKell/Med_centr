@@ -46,6 +46,19 @@ class ReleaseSafetyTests(unittest.TestCase):
         with self.testing_session() as db:
             return seed_sops(db)
 
+    def test_frontend_and_api_share_application(self):
+        page = self.client.get('/')
+        self.assertEqual(page.status_code, 200)
+        self.assertIn('text/html', page.headers['content-type'])
+        script = self.client.get('/js/api.js')
+        self.assertEqual(script.status_code, 200)
+        self.assertIn("const API_BASE = '';", script.text)
+        self.assertEqual(self.client.get('/health').json(), {'status': 'ok'})
+        self.assertEqual(self.client.get('/api/sops/').status_code, 200)
+        self.assertEqual(self.client.get('/docs').status_code, 200)
+        for path in ('/backend/config.py', '/.env', '/dental.db', '/api/not-found'):
+            self.assertEqual(self.client.get(path).status_code, 404)
+
     def test_clinical_record_api_routes_are_removed(self):
         for path in ('/api/patients/', '/api/cards/', '/api/situations/', '/api/ai/generate-situation'):
             with self.subTest(path=path):

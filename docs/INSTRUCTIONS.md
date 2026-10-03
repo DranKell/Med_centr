@@ -14,7 +14,8 @@
     Swagger: http://localhost:9090/docs
 
 ШАГ 4. Frontend
-    Открыть frontend\index.html в браузере
+    Открыть http://127.0.0.1:9090/ в браузере.
+    Frontend и API работают на одном порту. Можно запустить start.bat из корня проекта.
 
 ШАГ 5. Ключи ИИ
     Вписать в backend\.env : GIGACHAT_CLIENT_ID, GIGACHAT_CLIENT_SECRET, YANDEX_IAM_TOKEN, YANDEX_FOLDER_ID

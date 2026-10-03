@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:9090';
+const API_BASE = '';
 const API = {
     async checkBackend() {
         try {
