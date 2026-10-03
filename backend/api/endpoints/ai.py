@@ -8,6 +8,7 @@ from services.ai_service.prompts import APP_SYSTEM
 from services.ai_service.cache import CacheService
 from services.ai_service.legal_search import format_official_references, search_official_documents
 from services.ai_service.sanitizer import sanitize_document_text
+from services.ai_service.compliance import build_evidence_report
 
 router = APIRouter()
 
@@ -147,11 +148,14 @@ async def generate_sop(req: GenerateSopRequest):
     except (ValueError, json.JSONDecodeError) as error:
         raise HTTPException(status_code=502, detail='ИИ ответил в некорректном формате. Текущий текст СОПа не изменён.') from error
 
+    evidence_report = build_evidence_report(source_search, normative_refs)
     return {
         'text': text,
         'provider': response.provider,
         'from_cache': response.from_cache,
         'normative_search': source_search,
+        'evidence_report': evidence_report,
+        'compliance_confirmed': False,
         'fallback': False,
         'draft': True,
         'warning': 'Черновик ИИ. Требуется проверка ответственным специалистом.',

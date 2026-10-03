@@ -12,6 +12,8 @@ from models.sop import SOP
 from seed_sops import seed_sops
 from sop_catalog import CATALOGUE
 from services.ai_service.gigachat import GigaChatProvider
+from services.ai_service.compliance import build_evidence_report
+
 from api.endpoints.ai import parse_model_object
 
 
@@ -66,6 +68,21 @@ class ReleaseSafetyTests(unittest.TestCase):
             self.assertIn('сверить', sop.normative_refs)
             self.assertIn('одним врачом', sop.scope)
             self.assertIn('приостановить', sop.procedure)
+
+    def test_evidence_report_never_confirms_compliance_from_catalog_card(self):
+        report = build_evidence_report({
+            'status': 'found',
+            'sources': [{
+                'title': 'Об утверждении документа',
+                'url': 'http://publication.pravo.gov.ru/document/1234567890123',
+                'publication_number': '1234567890123',
+                'publication_date': '01.09.2026',
+            }],
+        })
+        self.assertFalse(report['compliance_confirmed'])
+        self.assertEqual(report['status'], 'insufficient_evidence')
+        self.assertEqual(report['sources'][0]['full_text_status'], 'not_retrieved')
+        self.assertIsNone(report['requirements'][0]['requirement'])
 
     def test_checklist_templates_can_be_loaded(self):
         response = self.client.get('/api/checklists/templates')
