@@ -2,7 +2,10 @@
 
 Локальный каталог из 88 черновиков СОП для стоматологической клиники с одним врачом.
 
-Создание каталога: из `backend/` выполнить `venv\Scripts\python.exe seed_sops.py`.
+Запуск: дважды щёлкнуть `start.bat` в корне проекта (нужен Python 3.11 или 3.12;
+скрипт сам создаёт окружение `backend\venv`, устанавливает зависимости и каталог СОП).
+Ручной вариант из `backend/`: `py -3.12 -m venv venv`, затем
+`venv\Scripts\python.exe -m pip install -r requirements.txt` и `venv\Scripts\python.exe seed_sops.py`.
 Запуск backend: `venv\Scripts\python.exe run.py`.
 
 Все СОПы являются проектами. Перед утверждением необходимо сверить применимость
