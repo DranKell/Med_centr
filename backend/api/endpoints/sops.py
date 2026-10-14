@@ -1,6 +1,7 @@
 from datetime import date
 
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from typing import List
 from database import get_db
@@ -29,6 +30,11 @@ def get_sop(sop_id: int, db: Session = Depends(get_db)):
 def create_sop(sop: SOPCreate, db: Session = Depends(get_db)):
     db_sop = SOP(**sop.model_dump(exclude={'status'}), status='draft')
     db.add(db_sop)
+    try:
+        db.flush()
+    except IntegrityError as error:
+        db.rollback()
+        raise HTTPException(status_code=409, detail='SOP with this key already exists') from error
     db.commit()
     db.refresh(db_sop)
     return db_sop

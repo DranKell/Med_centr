@@ -99,7 +99,7 @@ const SOPEditor = {
         for (const k in SOP_CATEGORIES) html += '<option value="' + k + '"' + (s.category === k ? ' selected' : '') + '>' + SOP_CATEGORIES[k] + '</option>';
         html += '</select></label></div>';
         this.fields.forEach(function(f) {
-            html += '<div class="sop-field"><label>' + f.label + '</label><textarea id="sop-f-' + f.key + '"' + (editable ? '' : ' readonly') + '>' + escapeSOPHTML(formatSOPField(s[f.key], f.key)) + '</textarea></div>';
+            html += '<div class="sop-field"><label>' + f.label + '</label><textarea id="sop-f-' + f.key + '"' + (editable ? '' : ' readonly') + '>' + escapeSOPHTML(formatSOPField(s[f.key], f.key)) + '</textarea><div class="sop-field-print" data-print-field="' + f.key + '"></div></div>';
         });
         html += '<div class="sop-actions no-print">';
         if (editable) {
@@ -254,4 +254,11 @@ const SOPEditor = {
 document.addEventListener('DOMContentLoaded', function() {
     const btn = document.querySelector('[data-tab="sops"]');
     if (btn) btn.addEventListener('click', function() { SOPEditor.loadList(); });
+    window.addEventListener('beforeprint', function() {
+        SOPEditor.fields.forEach(function(field) {
+            const input = document.getElementById('sop-f-' + field.key);
+            const printField = document.querySelector('[data-print-field="' + field.key + '"]');
+            if (input && printField) printField.textContent = input.value;
+        });
+    });
 });

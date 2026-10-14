@@ -13,11 +13,11 @@ def build_evidence_report(search_result: dict, user_references: str = '') -> dic
         try:
             address = urlsplit(url)
             trusted = (
-                address.scheme in ('http', 'https')
+                address.scheme == 'https'
                 and address.hostname == 'publication.pravo.gov.ru'
                 and address.username is None
                 and address.password is None
-                and address.port in (None, 80, 443)
+                and address.port in (None, 443)
                 and re.fullmatch(r'/document/\d+/?', address.path) is not None
                 and not address.query and not address.fragment
             )

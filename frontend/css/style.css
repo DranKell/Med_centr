@@ -57,8 +57,10 @@ footer { background: #2d3748; color: white; text-align: center; padding: 20px 0;
 .sop-card-panel { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); max-height: 75vh; overflow-y: auto; }
 .sop-card-panel h3 { color: #667eea; margin-bottom: 5px; }
 .sop-field label { display: block; font-weight: bold; margin-top: 12px; }
-.sop-field textarea { width: 100%; min-height: 70px; padding: 8px; border: 2px solid #ddd; border-radius: 5px; font-family: inherit; }
+.sop-field { width: 100%; min-width: 0; }
+.sop-field textarea { display: block; width: 100%; min-height: 70px; padding: 8px; border: 2px solid #ddd; border-radius: 5px; font-family: inherit; resize: vertical; }
 .sop-field textarea[readonly] { background: #f7fafc; }
+.sop-field-print { display: none; }
 .sop-actions { margin-top: 15px; }
 .sop-meta label { display: block; margin-top: 8px; font-weight: bold; }
 .sop-meta input, .sop-meta select { width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 5px; margin-top: 4px; }
@@ -85,6 +87,8 @@ footer { background: #2d3748; color: white; text-align: center; padding: 20px 0;
 	.sop-print-sheet th:first-child, .sop-print-sheet td:first-child { width: 8mm; text-align: center; }
 	.sop-print-sheet h2 { margin-bottom: 8mm; }
 	.print-note { margin-top: 8mm; font-size: 9pt; }
+	.sop-field textarea { display: none; }
+	.sop-field-print { display: block; width: 100%; min-height: 1em; white-space: pre-wrap; overflow-wrap: anywhere; }
 }
 	.checklist-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 24px; }
 	.checklist-header p { max-width: 680px; color: #53616f; }

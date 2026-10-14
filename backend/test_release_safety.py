@@ -87,7 +87,7 @@ class ReleaseSafetyTests(unittest.TestCase):
             'status': 'found',
             'sources': [{
                 'title': 'Об утверждении документа',
-                'url': 'http://publication.pravo.gov.ru/document/1234567890123',
+                'url': 'https://publication.pravo.gov.ru/document/1234567890123',
                 'publication_number': '1234567890123',
                 'publication_date': '01.09.2026',
             }],
@@ -96,6 +96,35 @@ class ReleaseSafetyTests(unittest.TestCase):
         self.assertEqual(report['status'], 'insufficient_evidence')
         self.assertEqual(report['sources'][0]['full_text_status'], 'not_retrieved')
         self.assertIsNone(report['requirements'][0]['requirement'])
+
+    def test_official_portal_uses_https_and_verified_tls(self):
+        import ssl
+        from services.ai_service.legal_search import OFFICIAL_PORTAL, _official_tls_context
+
+        self.assertTrue(OFFICIAL_PORTAL.startswith('https://publication.pravo.gov.ru'))
+        context = _official_tls_context()
+        self.assertTrue(context.check_hostname)
+        self.assertEqual(context.verify_mode, ssl.CERT_REQUIRED)
+        self.assertGreaterEqual(context.minimum_version, ssl.TLSVersion.TLSv1_2)
+
+    def test_evidence_report_rejects_plain_http_source(self):
+        report = build_evidence_report({
+            'status': 'found',
+            'sources': [{
+                'title': 'Об утверждении документа',
+                'url': 'http://publication.pravo.gov.ru/document/0001202507250036',
+                'publication_number': '0001202507250036',
+                'publication_date': '25.07.2025',
+            }],
+        })
+        self.assertEqual(report['sources'][0]['metadata_status'], 'rejected')
+        self.assertEqual(report['requirements'], [])
+
+    def test_duplicate_sop_key_returns_409_instead_of_500(self):
+        payload = {'key': 'duplicate-test', 'title': 'Дубликат', 'category': 'clinical', 'status': 'draft'}
+        self.assertEqual(self.client.post('/api/sops/', json=payload).status_code, 200)
+        duplicate = self.client.post('/api/sops/', json=payload)
+        self.assertEqual(duplicate.status_code, 409)
 
     def test_checklist_templates_can_be_loaded(self):
         response = self.client.get('/api/checklists/templates')
@@ -258,7 +287,7 @@ class ReleaseSafetyTests(unittest.TestCase):
             'queries': ['СанПиН'],
             'sources': [{
                 'title': 'Постановление Главного государственного санитарного врача РФ',
-                'url': 'http://publication.pravo.gov.ru/document/0001202507250036',
+                'url': 'https://publication.pravo.gov.ru/document/0001202507250036',
                 'publication_number': '0001202507250036',
                 'publication_date': '25.07.2025',
             }],
@@ -266,7 +295,7 @@ class ReleaseSafetyTests(unittest.TestCase):
 
         self.assertIn('0001202507250036', result)
         self.assertIn('25.07.2025', result)
-        self.assertIn('http://publication.pravo.gov.ru/document/', result)
+        self.assertIn('https://publication.pravo.gov.ru/document/', result)
 
     def test_official_search_parser_extracts_document_metadata(self):
         from services.ai_service.legal_search import parse_official_documents
@@ -293,13 +322,13 @@ class ReleaseSafetyTests(unittest.TestCase):
             'sources': [
                 {
                     'title': 'Постановление от 2025 года № 12 "О внесении изменений в постановление № 4 "Об утверждении правил"',
-                    'url': 'http://publication.pravo.gov.ru/document/amendment',
+                    'url': 'https://publication.pravo.gov.ru/document/amendment',
                     'publication_number': 'amendment',
                     'publication_date': '25.07.2025',
                 },
                 {
                     'title': 'Постановление Главного санитарного врача от 28.01.2021 № 4 "Об утверждении СанПиН 3.3686-21"',
-                    'url': 'http://publication.pravo.gov.ru/document/base',
+                    'url': 'https://publication.pravo.gov.ru/document/base',
                     'publication_number': 'base',
                     'publication_date': '18.02.2021',
                 },

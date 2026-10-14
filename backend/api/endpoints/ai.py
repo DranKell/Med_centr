@@ -107,7 +107,7 @@ class GenerateSopRequest(BaseModel):
     title: str = Field(..., min_length=1, max_length=300)
     category: str = Field(default='emergency', max_length=100)
     normative_refs: str = Field(default='', max_length=3000)
-    enabled_providers: list[str] | None = Field(default=None, max_items=10)
+    enabled_providers: list[str] | None = Field(default=None, max_length=10)
 
 @router.post('/generate-sop')
 async def generate_sop(req: GenerateSopRequest):

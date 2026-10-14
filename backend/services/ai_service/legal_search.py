@@ -1,3 +1,4 @@
+import ssl
 from html.parser import HTMLParser
 import re
 from datetime import datetime
@@ -6,7 +7,7 @@ from urllib.parse import urljoin
 import httpx
 
 
-OFFICIAL_PORTAL = 'http://publication.pravo.gov.ru'
+OFFICIAL_PORTAL = 'https://publication.pravo.gov.ru'
 SEARCH_URL = f'{OFFICIAL_PORTAL}/Documents/search'
 CATEGORY_SEARCH_TERMS = {
     'infection-control': ['СанПиН 3.3686-21'],
@@ -102,6 +103,15 @@ def parse_official_documents(html: str, limit: int = 5) -> list[dict[str, str]]:
     return list(unique.values())[:limit]
 
 
+def _official_tls_context(ca_bundle: str | None = None) -> ssl.SSLContext:
+    """TLS-контекст для Официального портала: проверка цепочки и имени хоста, TLS не ниже 1.2."""
+    context = httpx.create_ssl_context(verify=ca_bundle or True)
+    context.check_hostname = True
+    context.verify_mode = ssl.CERT_REQUIRED
+    context.minimum_version = ssl.TLSVersion.TLSv1_2
+    return context
+
+
 async def search_official_documents(
     queries: list[str],
     ca_bundle: str | None = None,
@@ -129,7 +139,7 @@ async def search_official_documents(
     sources = []
     errors = []
     try:
-        async with httpx.AsyncClient(timeout=15.0, verify=ca_bundle or True, follow_redirects=True) as client:
+        async with httpx.AsyncClient(timeout=15.0, verify=_official_tls_context(ca_bundle), follow_redirects=True) as client:
             for query in normalized_queries:
                 try:
                     response = await client.get(
@@ -138,6 +148,9 @@ async def search_official_documents(
                         headers={'User-Agent': 'DentalClinicSOP/1.0'},
                     )
                     response.raise_for_status()
+                    if response.url.scheme != 'https' or response.url.host != 'publication.pravo.gov.ru':
+                        errors.append(query)
+                        continue
                     parsed_sources = parse_official_documents(response.text, limit=30)
                     if not parsed_sources and 'Документы не найдены' not in response.text:
                         errors.append(query)
